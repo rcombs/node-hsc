@@ -12,7 +12,7 @@ var exports = module.exports = function(username, password, cb){
 	return this;
 }
 
-exports.request = function(func, cb, params, method){
+exports.prototype.request = function(func, cb, params, method){
 	if(!method){
 		method = "GET";
 	}
@@ -35,23 +35,32 @@ exports.request = function(func, cb, params, method){
 		if(typeof body != "object"){
 			return cb(new Error("Response Not JSON"));
 		}
+		if(body.error){
+			return cb(new Error(body.error));
+		}
 		cb(false, body);
 	});
 	return req;
 }
 
-exports.get = function(func, cb, params){
+exports.prototype.get = function(func, cb, params){
 	this.request(func, cb, params, "GET");
 }
 
-exports.post = function(func, cb, params){
+exports.prototype.post = function(func, cb, params){
 	this.request(func, cb, params, "POST");
 }
 
-exports.put = function(func, cb, params){
+exports.prototype.put = function(func, cb, params){
 	this.request(func, cb, params, "PUT");
 }
 
-exports.auth = function(username, password, cb){
-	this.get("notifications", cb, {email: username, password: password}, "GET");
+exports.prototype.auth = function(username, password, cb){
+	this.get("notifications", function(err, body){
+		if(err){
+			cb(false);
+		}else{
+			cb(true);
+		}
+	}, {email: username, password: password}, "GET");
 }
